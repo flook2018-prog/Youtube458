@@ -67,15 +67,19 @@ def login_required(f):
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     """Login page"""
-    if request.method == 'POST':
-        password = request.form.get('password', '')
-        if password == WEB_UI_SECRET:
-            session['authenticated'] = True
-            return redirect(url_for('index'))
-        else:
-            return render_template('login.html', error='Invalid password'), 401
-    
-    return render_template('login.html')
+    try:
+        if request.method == 'POST':
+            password = request.form.get('password', '')
+            if password == WEB_UI_SECRET:
+                session['authenticated'] = True
+                return redirect(url_for('index'))
+            else:
+                return render_template('login.html', error='Invalid password'), 401
+        
+        return render_template('login.html')
+    except Exception as e:
+        print(f"❌ Login error: {str(e)}")
+        return render_template('login.html', error='Server error'), 500
 
 @app.route('/logout')
 def logout():

@@ -19,7 +19,7 @@ FLASK_HOST = os.getenv('FLASK_HOST', '0.0.0.0')
 FLASK_DEBUG = os.getenv('FLASK_ENV') == 'development'
 
 # Web UI
-WEB_UI_SECRET = os.getenv('WEB_UI_SECRET', 'your-secret-key-change-this')
+WEB_UI_SECRET = os.getenv('WEB_UI_SECRET', 'mongodb2024')  # Default fallback
 
 # Environment
 ENVIRONMENT = os.getenv('ENVIRONMENT', 'development')
