@@ -64,52 +64,13 @@ def add_security_headers(response):
     return response
 
 def login_required(f):
-    """Decorator to require login"""
+    """Decorator - disabled (no login required)"""
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if 'authenticated' not in session:
-            return redirect(url_for('login'))
         return f(*args, **kwargs)
     return decorated_function
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    """Login page"""
-    try:
-        logger.debug(f"📝 Login request: {request.method}")
-        if request.method == 'POST':
-            password = request.form.get('password', '')
-            logger.debug(f"🔐 Password check: {len(password)} chars")
-            if password == WEB_UI_SECRET:
-                session['authenticated'] = True
-                logger.info(f"✅ Login successful")
-                return redirect(url_for('index'))
-            else:
-                logger.warning(f"❌ Invalid password attempt")
-                return render_template('login.html', error='Invalid password'), 401
-        
-        logger.debug(f"📄 Rendering login page")
-        return render_template('login.html')
-    except Exception as e:
-        logger.error(f"❌ Login error: {str(e)}")
-        logger.error(traceback.format_exc())
-        return render_template('login.html', error='Server error'), 500
-
-@app.route('/logout')
-def logout():
-    """Logout"""
-    session.clear()
-    return redirect(url_for('login'))
-
 @app.route('/')
-def root():
-    """Root route - redirect to login or dashboard"""
-    if 'authenticated' in session:
-        return redirect(url_for('index'))
-    return redirect(url_for('login'))
-
-@app.route('/dashboard')
-@login_required
 def index():
     """Main dashboard"""
     try:
