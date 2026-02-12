@@ -102,18 +102,38 @@ def logout():
     return redirect(url_for('login'))
 
 @app.route('/')
+def root():
+    """Root route - redirect to login or dashboard"""
+    if 'authenticated' in session:
+        return redirect(url_for('index'))
+    return redirect(url_for('login'))
+
+@app.route('/dashboard')
 @login_required
 def index():
     """Main dashboard"""
-    channels = db.get_all_channels()
-    return render_template('index.html', channels=channels)
+    try:
+        logger.debug(f"📊 Loading dashboard")
+        channels = db.get_all_channels()
+        logger.debug(f"✅ Loaded {len(channels) if channels else 0} channels")
+        return render_template('index.html', channels=channels)
+    except Exception as e:
+        logger.error(f"❌ Dashboard error: {str(e)}")
+        logger.error(traceback.format_exc())
+        return render_template('index.html', channels=[], error='Failed to load channels'), 500
 
 @app.route('/api/channels', methods=['GET'])
 @login_required
 def get_channels():
     """Get all channels as JSON"""
-    channels = db.get_all_channels()
-    return jsonify(channels)
+    try:
+        logger.debug(f"📡 API: Getting channels")
+        channels = db.get_all_channels()
+        logger.debug(f"✅ API: Got {len(channels) if channels else 0} channels")
+        return jsonify(channels)
+    except Exception as e:
+        logger.error(f"❌ API get_channels error: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/channels/add', methods=['POST'])
 @login_required
