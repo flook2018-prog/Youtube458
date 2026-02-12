@@ -251,7 +251,8 @@ def server_error(error):
     """500 handler"""
     return jsonify({'error': 'Server error'}), 500
 
-if __name__ == '__main__':
-    # Production settings
-    debug_mode = ENVIRONMENT == 'development'
+# Note: For Gunicorn/production use, server is started via WSGI entry point
+# This block is only for local development
+if __name__ == '__main__' and ENVIRONMENT == 'development':
+    debug_mode = True
     app.run(host=FLASK_HOST, port=FLASK_PORT, debug=debug_mode)

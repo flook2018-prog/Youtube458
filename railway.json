@@ -4,7 +4,7 @@
     "builder": "dockerfile"
   },
   "deploy": {
-    "startCommand": "python app.py",
+    "startCommand": "gunicorn --bind 0.0.0.0:5000 --workers 2 --threads 4 --timeout 60 wsgi:app",
     "restartPolicyMaxRetries": 5,
     "restartPolicyWindowSeconds": 60
   },
