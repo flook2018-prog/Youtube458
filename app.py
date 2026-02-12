@@ -4,6 +4,12 @@ from youtube_handler import YouTubeHandler
 from config import WEB_UI_SECRET, FLASK_PORT, FLASK_HOST, ALLOWED_HOSTS, SESSION_COOKIE_SECURE, SESSION_COOKIE_HTTPONLY, SESSION_COOKIE_SAMESITE, ENVIRONMENT
 from functools import wraps
 import os
+import traceback
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 app.secret_key = WEB_UI_SECRET
@@ -13,6 +19,8 @@ app.config['SESSION_COOKIE_SECURE'] = SESSION_COOKIE_SECURE
 app.config['SESSION_COOKIE_HTTPONLY'] = SESSION_COOKIE_HTTPONLY
 app.config['SESSION_COOKIE_SAMESITE'] = SESSION_COOKIE_SAMESITE
 app.config['PERMANENT_SESSION_LIFETIME'] = 24 * 60 * 60  # 24 hours
+
+logger.info(f"🚀 App initialized. Environment: {ENVIRONMENT}, Secret key set: {bool(WEB_UI_SECRET)}")
 
 youtube = YouTubeHandler()
 
@@ -68,17 +76,23 @@ def login_required(f):
 def login():
     """Login page"""
     try:
+        logger.debug(f"📝 Login request: {request.method}")
         if request.method == 'POST':
             password = request.form.get('password', '')
+            logger.debug(f"🔐 Password check: {len(password)} chars")
             if password == WEB_UI_SECRET:
                 session['authenticated'] = True
+                logger.info(f"✅ Login successful")
                 return redirect(url_for('index'))
             else:
+                logger.warning(f"❌ Invalid password attempt")
                 return render_template('login.html', error='Invalid password'), 401
         
+        logger.debug(f"📄 Rendering login page")
         return render_template('login.html')
     except Exception as e:
-        print(f"❌ Login error: {str(e)}")
+        logger.error(f"❌ Login error: {str(e)}")
+        logger.error(traceback.format_exc())
         return render_template('login.html', error='Server error'), 500
 
 @app.route('/logout')
@@ -245,18 +259,29 @@ def format_number(n):
     except:
         return str(n)
 
-@app.errorhandler(404)
-def not_found(error):
-    """404 handler"""
-    return jsonify({'error': 'Not found'}), 404
-
 @app.errorhandler(500)
 def server_error(error):
     """500 handler"""
-    return jsonify({'error': 'Server error'}), 500
+    logger.error(f"❌ 500 Error: {str(error)}")
+    logger.error(traceback.format_exc())
+    return jsonify({'error': 'Server error', 'details': str(error)}), 500
+
+@app.errorhandler(404)
+def not_found(error):
+    """404 handler"""
+    logger.warning(f"⚠️  404 Not Found: {request.path}")
+    return jsonify({'error': 'Not found'}), 404
+
+@app.errorhandler(Exception)
+def handle_exception(error):
+    """Global exception handler"""
+    logger.error(f"💥 Unhandled Exception: {str(error)}")
+    logger.error(traceback.format_exc())
+    return jsonify({'error': 'Internal server error', 'details': str(error)}), 500
 
 # Note: For Gunicorn/production use, server is started via WSGI entry point
 # This block is only for local development
 if __name__ == '__main__' and ENVIRONMENT == 'development':
     debug_mode = True
+    logger.info(f"🔨 Development server starting on {FLASK_HOST}:{FLASK_PORT}")
     app.run(host=FLASK_HOST, port=FLASK_PORT, debug=debug_mode)
