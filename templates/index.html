@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎬 YouTube Channel Monitor Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .navbar-title {
+            font-size: 24px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .navbar-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: white;
+            color: #667eea;
+        }
+        
+        .btn-primary:hover {
+            background: #f0f0f0;
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .btn-danger {
+            background: #ff6b6b;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #ff5252;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+        
+        .section {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .add-channel-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .add-channel-form input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        .add-channel-form input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .add-channel-form button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .add-channel-form button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .channels-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .channel-card {
+            background: #f9fafb;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .channel-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+        }
+        
+        .channel-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .status-badge {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        
+        .status-active {
+            background: #10b981;
+            animation: pulse-green 2s infinite;
+        }
+        
+        .status-inactive {
+            background: #ef4444;
+        }
+        
+        .status-pending {
+            background: #f59e0b;
+            animation: pulse-orange 2s infinite;
+        }
+        
+        @keyframes pulse-green {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        @keyframes pulse-orange {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .channel-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            word-break: break-word;
+        }
+        
+        .channel-url {
+            font-size: 12px;
+            color: #999;
+            word-break: break-all;
+            margin: 10px 0;
+            padding: 8px;
+            background: white;
+            border-radius: 4px;
+            border-left: 3px solid #667eea;
+        }
+        
+        .channel-stats {
+            border-top: 1px solid #e5e7eb;
+            padding-top: 12px;
+            margin-top: 12px;
+            font-size: 13px;
+        }
+        
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            color: #666;
+        }
+        
+        .stat-label {
+            font-weight: 500;
+        }
+        
+        .stat-value {
+            color: #333;
+            text-align: right;
+            word-break: break-word;
+            max-width: 150px;
+        }
+        
+        .channel-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .btn-small {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .btn-check {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-check:hover {
+            background: #5568d3;
+        }
+        
+        .btn-remove {
+            background: #fee;
+            color: #c33;
+        }
+        
+        .btn-remove:hover {
+            background: #fdd;
+        }
+        
+        .btn-small:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .message {
+            padding: 16px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .message-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .message-error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+        
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        
+        .empty-text {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        
+        .video-link {
+            color: #667eea;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        .video-link:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 768px) {
+            .add-channel-form {
+                flex-direction: column;
+            }
+            
+            .channels-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .navbar {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-title">
+            🎬 YouTube Channel Monitor
+        </div>
+        <div class="navbar-actions">
+            <a href="#" class="btn btn-secondary" onclick="location.reload()">🔄 Refresh</a>
+            <a href="{{ url_for('logout') }}" class="btn btn-secondary">🚪 Sign Out</a>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <div id="message-container"></div>
+        
+        <div class="section">
+            <div class="section-title">➕ Add New Channel</div>
+            <div class="add-channel-form">
+                <input type="text" id="channelUrl" placeholder="Paste YouTube channel URL (e.g., https://www.youtube.com/@channelname)" autofocus>
+                <button onclick="addChannel()">Add Channel</button>
+            </div>
+            <small style="color: #999;">
+                ✓ Supports: https://www.youtube.com/@username, https://www.youtube.com/channel/ID, https://www.youtube.com/user/username
+            </small>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">📊 Monitored Channels</div>
+            <div id="channels-container"></div>
+        </div>
+    </div>
+    
+    <script>
+        const DEFAULT_REFRESH_INTERVAL = 300000; // 5 minutes
+        
+        // Load channels on page load
+        window.addEventListener('load', loadChannels);
+        
+        // Auto-refresh channels every 5 minutes
+        setInterval(loadChannels, DEFAULT_REFRESH_INTERVAL);
+        
+        async function loadChannels() {
+            try {
+                const response = await fetch('/api/channels');
+                const channels = await response.json();
+                
+                const container = document.getElementById('channels-container');
+                
+                if (channels.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">📭</div>
+                            <div class="empty-text">No channels added yet</div>
+                            <p style="font-size: 13px; color: #bbb;">Add a YouTube channel URL above to get started</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                let html = '';
+                channels.forEach(channel => {
+                    const statusClass = `status-${channel.status || 'pending'}`;
+                    const statusText = {
+                        'active': '✅ Active',
+                        'inactive': '❌ Inactive',
+                        'pending': '⏳ Checking...'
+                    }[channel.status] || '❓ Unknown';
+                    
+                    const lastChecked = channel.last_checked ? 
+                        new Date(channel.last_checked).toLocaleString() : 'Never';
+                    
+                    html += `
+                        <div class="channel-card" data-channel-id="${channel.id}">
+                            <div class="channel-status">
+                                <span class="status-badge ${statusClass}"></span>
+                                <span>${statusText}</span>
+                            </div>
+                            
+                            <div class="channel-name">${escapeHtml(channel.channel_name || 'Loading...')}</div>
+                            <div class="channel-url">${escapeHtml(channel.channel_url)}</div>
+                            
+                            <div class="channel-stats">
+                                <div class="stat-row">
+                                    <span class="stat-label">Last Video:</span>
+                                    <span class="stat-value">${channel.last_video_title ? escapeHtml(channel.last_video_title.substring(0, 40)) : 'N/A'}</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span class="stat-label">Views:</span>
+                                    <span class="stat-value">${channel.last_video_views ? formatNumber(channel.last_video_views) : '0'}</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span class="stat-label">Last Check:</span>
+                                    <span class="stat-value" style="font-size: 11px;">${lastChecked}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="channel-actions">
+                                <button class="btn-small btn-check" onclick="checkChannel(${channel.id})">Check Now</button>
+                                <button class="btn-small btn-remove" onclick="removeChannel(${channel.id})">Delete</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                container.innerHTML = html;
+            } catch (error) {
+                console.error('Error loading channels:', error);
+                showMessage('Failed to load channels', 'error');
+            }
+        }
+        
+        async function addChannel() {
+            const urlInput = document.getElementById('channelUrl');
+            const url = urlInput.value.trim();
+            
+            if (!url) {
+                showMessage('Please enter a YouTube channel URL', 'error');
+                return;
+            }
+            
+            if (!url.includes('youtube.com') && !url.includes('youtu.be')) {
+                showMessage('Please enter a valid YouTube URL', 'error');
+                return;
+            }
+            
+            try {
+                const button = event.target;
+                button.disabled = true;
+                button.innerHTML = '<span class="loading"></span>';
+                
+                const response = await fetch('/api/channels/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    urlInput.value = '';
+                    showMessage('✅ Channel added successfully!', 'success');
+                    loadChannels();
+                } else {
+                    showMessage(`❌ ${data.error || 'Failed to add channel'}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error adding channel:', error);
+                showMessage('Error adding channel', 'error');
+            } finally {
+                const button = event.target;
+                button.disabled = false;
+                button.innerHTML = 'Add Channel';
+            }
+        }
+        
+        async function checkChannel(channelId) {
+            try {
+                const card = document.querySelector(`[data-channel-id="${channelId}"]`);
+                const button = card.querySelector('.btn-check');
+                button.disabled = true;
+                button.innerHTML = '<span class="loading"></span>';
+                
+                const response = await fetch(`/api/channels/${channelId}/check`, {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage('✅ Channel status updated!', 'success');
+                    loadChannels();
+                } else {
+                    showMessage(`❌ ${data.error || 'Failed to check channel'}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error checking channel:', error);
+                showMessage('Error checking channel', 'error');
+            }
+        }
+        
+        async function removeChannel(channelId) {
+            if (!confirm('Are you sure you want to remove this channel?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/channels/${channelId}/remove`, {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage('✅ Channel removed successfully!', 'success');
+                    loadChannels();
+                } else {
+                    showMessage(`❌ ${data.error || 'Failed to remove channel'}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error removing channel:', error);
+                showMessage('Error removing channel', 'error');
+            }
+        }
+        
+        function showMessage(message, type) {
+            const container = document.getElementById('message-container');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message message-${type}`;
+            messageDiv.innerHTML = message;
+            container.appendChild(messageDiv);
+            
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 5000);
+        }
+        
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+        
+        function formatNumber(num) {
+            if (num === null || num === undefined) return '0';
+            return num.toLocaleString();
+        }
+        
+        // Allow adding channel with Enter key
+        document.getElementById('channelUrl').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addChannel();
+        });
+    </script>
+</body>
+</html>
